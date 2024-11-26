@@ -91,8 +91,12 @@ bot.action('file_1', async (ctx) => {
 // Настройка Webhook
 
 
-const webhookUrl = `http://egor-bot.onrender.com/${process.env.BOT_TOKEN}`;
-bot.telegram.setWebhook(webhookUrl);
+const webhookUrl = `https://egor-bot.onrender.com/${process.env.BOT_TOKEN}`;
+bot.telegram.setWebhook(webhookUrl).then(() => {
+    console.log('Webhook установлен на:', webhookUrl);
+}).catch(err => {
+    console.error('Ошибка при установке Webhook:', err);
+});
 
 // Обработчик для webhook
 app.use(bot.webhookCallback(`/`));
