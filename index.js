@@ -31,18 +31,27 @@ bot.telegram.setWebhook(webhookUrl).then(() => {
   console.log('Webhook установлен на:', webhookUrl);
 });
 
+// Функция для проверки подписки
+async function checkSubscription(userId, ctx) {
+  try {
+    const member = await ctx.telegram.getChatMember(process.env.CHANNEL_ID, userId);
+    return ['member', 'administrator', 'creator'].includes(member.status);
+  } catch (error) {
+    console.error('Ошибка проверки подписки:', error);
+    return false;
+  }
+}
+
 // Функция для обработки команды /start и кнопки "🔄 Старт"
 async function handleStartCommand(ctx) {
   const userId = ctx.from.id;
-
-  // Проверка подписки (замените на вашу реальную логику)
-  const isSubscribed = true; // Например, проверка всегда возвращает true
+  const isSubscribed = await checkSubscription(userId, ctx);
 
   if (isSubscribed) {
     await ctx.reply(
       'Добро пожаловать! Вы подписаны на канал. Выберите файл для скачивания:',
       Markup.inlineKeyboard([
-        [Markup.button.callback('📥 Скачать файл 1', 'file_1')],
+        [Markup.button.callback('📥 Скачать файл по геометрии', 'file_1')],
        // [Markup.button.callback('📥 Скачать файл 2', 'file_2')],
       ])
     );
@@ -50,7 +59,7 @@ async function handleStartCommand(ctx) {
     await ctx.reply(
       'Упс!😱 Кажется, ты не подписался на канал! Подпишись и всё получится!✅',
       Markup.inlineKeyboard([
-        [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID}`)],
+        [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID.replace('@', '')}`)],
         [Markup.button.callback('🔄 Проверить подписку', 'check_subscription')],
       ])
     );
@@ -72,14 +81,13 @@ bot.hears('🔄 Старт', handleStartCommand);
 // Обработка кнопки "Проверить подписку"
 bot.action('check_subscription', async (ctx) => {
   const userId = ctx.from.id;
-
-  const isSubscribed = true; // Замените на вашу реальную логику проверки подписки
+  const isSubscribed = await checkSubscription(userId, ctx);
 
   if (isSubscribed) {
     await ctx.reply(
       'Теперь вы можете скачать файлы!',
       Markup.inlineKeyboard([
-        [Markup.button.callback('📥 Скачать файл 1', 'file_1')],
+        [Markup.button.callback('📥 Скачать файл по геометрии', 'file_1')],
        // [Markup.button.callback('📥 Скачать файл 2', 'file_2')],
       ])
     );
@@ -87,31 +95,57 @@ bot.action('check_subscription', async (ctx) => {
     await ctx.reply(
       'Упс!😱 Кажется, ты не подписался на канал! Подпишись и всё получится!✅',
       Markup.inlineKeyboard([
-        [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID}`)],
+        [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID.replace('@', '')}`)],
         [Markup.button.callback('🔄 Проверить подписку', 'check_subscription')],
       ])
     );
   }
 });
 
-// Обработчики для кнопок скачивания файлов
+// Обработчики для кнопок скачивания файлов с проверкой подписки
 bot.action('file_1', async (ctx) => {
-  try {
-    await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
-    await ctx.replyWithDocument({ source: './files/geom.pdf', filename: 'geom.pdf' });
-  } catch (error) {
-    console.error('Ошибка при отправке файла 1:', error);
-    ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
+  const userId = ctx.from.id;
+  const isSubscribed = await checkSubscription(userId, ctx);
+
+  if (isSubscribed) {
+    try {
+      await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
+      await ctx.replyWithDocument({ source: './files/geom.pdf', filename: 'geom.pdf' });
+    } catch (error) {
+      console.error('Ошибка при отправке файла 1:', error);
+      ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
+    }
+  } else {
+    await ctx.reply(
+      'Для скачивания файла нужно подписаться на мой канал! ✅',
+      Markup.inlineKeyboard([
+        [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID.replace('@', '')}`)],
+        [Markup.button.callback('🔄 Проверить подписку', 'check_subscription')],
+      ])
+    );
   }
 });
 
-//bot.action('file_2', async (ctx) => {
- // try {
- //   await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
- //   await ctx.replyWithDocument({ source: './files/file2.pdf', filename: 'file2.pdf' });
- // } catch (error) {
- //   console.error('Ошибка при отправке файла 2:', error);
-  //  ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
+// bot.action('file_2', async (ctx) => {
+ // const userId = ctx.from.id;
+ // const isSubscribed = await checkSubscription(userId, ctx);
+
+ // if (isSubscribed) {
+    //try {
+   //   await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
+   //   await ctx.replyWithDocument({ source: './files/file2.pdf', filename: 'file2.pdf' });
+  //  } catch (error) {
+   //   console.error('Ошибка при отправке файла 2:', error);
+   //   ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
+   // }
+  //} else {
+  //  await ctx.reply(
+  //    'Для скачивания файла нужно подписаться на наш канал! ✅',
+   //   Markup.inlineKeyboard([
+  //      [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID.replace('@', '')}`)],
+  //      [Markup.button.callback('🔄 Проверить подписку', 'check_subscription')],
+//      ])
+ //   );
  // }
 //});
 
