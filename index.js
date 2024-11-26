@@ -45,7 +45,7 @@ bot.start(async (ctx) => {
     reply_markup: {
       inline_keyboard: [
         [{ text: '📥 Скачать файл 1', callback_data: 'file_1' }],
-        [{ text: '📥 Скачать файл 2', callback_data: 'file_2' }]
+      //  [{ text: '📥 Скачать файл 2', callback_data: 'file_2' }]
       ]
     }
   });
@@ -62,15 +62,15 @@ bot.action('file_1', async (ctx) => {
   }
 });
 
-bot.action('file_2', async (ctx) => {
-  try {
-    await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
-    await ctx.replyWithDocument({ source: './files/file2.pdf', filename: 'file2.pdf' });
-  } catch (error) {
-    console.error('Ошибка при отправке файла 2:', error);
-    ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
-  }
-});
+ //bot.action('file_2', async (ctx) => {
+   //try {
+   //  await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
+  //   await ctx.replyWithDocument({ source: './files/file2.pdf', filename: 'file2.pdf' });
+  // } catch (error) {
+  //   console.error('Ошибка при отправке файла 2:', error);
+    // ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
+  // }
+ //});
 
 // Запуск сервера Express
 const PORT = process.env.PORT || 10000;
