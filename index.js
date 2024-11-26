@@ -1,35 +1,8 @@
-const express = require('express');
 const { Telegraf, Markup } = require('telegraf');
 require('dotenv').config();
 
-const app = express();
+// Создаем бота
 const bot = new Telegraf(process.env.BOT_TOKEN);
-
-// Для парсинга JSON тела запросов от Telegram
-app.use(express.json());
-
-// Обработчик для главной страницы (чтобы проверить, работает ли сервер)
-app.get('/', (req, res) => {
-  res.send('Bot is live and working!');
-});
-
-// Обработчик для получения обновлений от Telegram через Webhook
-app.post(`/${process.env.BOT_TOKEN}`, (req, res) => {
-  bot.handleUpdate(req.body)
-    .then(() => {
-      res.sendStatus(200); // Ответ успешный, Telegram знает, что запрос обработан
-    })
-    .catch(err => {
-      console.error('Ошибка при обработке обновлений:', err);
-      res.sendStatus(500); // В случае ошибки на сервере
-    });
-});
-
-// Настроим Webhook для бота
-const webhookUrl = `https://https://egor-bot.timeweb.ru/${process.env.BOT_TOKEN}`;
-bot.telegram.setWebhook(webhookUrl).then(() => {
-  console.log('Webhook установлен на:', webhookUrl);
-});
 
 // Функция для проверки подписки
 async function checkSubscription(userId, ctx) {
@@ -52,16 +25,16 @@ async function handleStartCommand(ctx) {
       'Нажимайте на кнопку ниже, чтобы скачать файл 📚 с теорией по геометрии и примерами реальных задач! ✨',
       Markup.inlineKeyboard([
         [Markup.button.callback('📥 Скачать файл по геометрии', 'file_1')],
-       // [Markup.button.callback('📥 Скачать файл 2', 'file_2')],
+        // [Markup.button.callback('📥 Скачать файл 2', 'file_2')],
       ])
     );
   } else {
-    await ctx.reply('Чтобы скачать полезные файлы 📚 по математике нужно подписаться на канал!')
+    await ctx.reply('Чтобы скачать полезные файлы 📚 по математике нужно подписаться на канал!');
     await ctx.reply(
       'Упс!😱 Кажется, ты не подписался! Подпишись и всё получится!✅ Обнял приподнял, в лобик поцеловал.',
       Markup.inlineKeyboard([
         [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID.replace('@', '')}`)],
-        [Markup.button.callback('🔄 Проверить подписку', 'check_subscription')],
+        [Markup.button.callback('🔄 Скачать файлы', 'check_subscription')],
       ])
     );
   }
@@ -89,11 +62,11 @@ bot.action('check_subscription', async (ctx) => {
       'Нажимайте на кнопку ниже, чтобы скачать файл 📚 с теорией по геометрии и примерами реальных задач! ✨',
       Markup.inlineKeyboard([
         [Markup.button.callback('📥 Скачать файл по геометрии', 'file_1')],
-       // [Markup.button.callback('📥 Скачать файл 2', 'file_2')],
+           // [Markup.button.callback('📥 Скачать файл 2', 'file_2')],
       ])
     );
   } else {
-    await ctx.reply('Чтобы скачать полезные файлы 📚 по математике нужно подписаться на канал!')
+    await ctx.reply('Чтобы скачать полезные файлы 📚 по математике нужно подписаться на канал!');
     await ctx.reply(
       'Упс!😱 Кажется, ты не подписался! Подпишись и всё получится!✅ Обнял приподнял, в лобик поцеловал.',
       Markup.inlineKeyboard([
@@ -104,7 +77,7 @@ bot.action('check_subscription', async (ctx) => {
   }
 });
 
-// Обработчики для кнопок скачивания файлов с проверкой подписки
+// Обработчик для скачивания файла
 bot.action('file_1', async (ctx) => {
   const userId = ctx.from.id;
   const isSubscribed = await checkSubscription(userId, ctx);
@@ -114,7 +87,7 @@ bot.action('file_1', async (ctx) => {
       await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
       await ctx.replyWithDocument({ source: './files/geom.pdf', filename: 'geom.pdf' });
     } catch (error) {
-      console.error('Ошибка при отправке файла 1:', error);
+      console.error('Ошибка при отправке файла:', error);
       ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
     }
   } else {
@@ -129,30 +102,33 @@ bot.action('file_1', async (ctx) => {
 });
 
 // bot.action('file_2', async (ctx) => {
- // const userId = ctx.from.id;
- // const isSubscribed = await checkSubscription(userId, ctx);
+// const userId = ctx.from.id;
+// const isSubscribed = await checkSubscription(userId, ctx);
 
- // if (isSubscribed) {
-    //try {
-   //   await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
-   //   await ctx.replyWithDocument({ source: './files/file2.pdf', filename: 'file2.pdf' });
-  //  } catch (error) {
-   //   console.error('Ошибка при отправке файла 2:', error);
-   //   ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
-   // }
-  //} else {
-  //  await ctx.reply(
-  //    'Для скачивания файла нужно подписаться на наш канал! ✅',
-   //   Markup.inlineKeyboard([
-  //      [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID.replace('@', '')}`)],
-  //      [Markup.button.callback('🔄 Проверить подписку', 'check_subscription')],
+// if (isSubscribed) {
+//try {
+//   await ctx.reply('Загрузка файла началась, пожалуйста, подождите...');
+//   await ctx.replyWithDocument({ source: './files/file2.pdf', filename: 'file2.pdf' });
+//  } catch (error) {
+//   console.error('Ошибка при отправке файла 2:', error);
+//   ctx.reply('Произошла ошибка при загрузке файла. Попробуйте позже.');
+// }
+//} else {
+//  await ctx.reply(
+//    'Для скачивания файла нужно подписаться на наш канал! ✅',
+//   Markup.inlineKeyboard([
+//      [Markup.button.url('🔗 Подписаться на канал', `https://t.me/${process.env.CHANNEL_ID.replace('@', '')}`)],
+//      [Markup.button.callback('🔄 Проверить подписку', 'check_subscription')],
 //      ])
- //   );
- // }
+//   );
+// }
 //});
 
-// Запуск сервера Express
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Запуск бота через Polling
+bot.launch().then(() => {
+  console.log('Бот успешно запущен через Polling!');
 });
+
+// Обработка сигналов завершения для корректного отключения бота
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
