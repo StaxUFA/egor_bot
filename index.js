@@ -26,7 +26,7 @@ app.post(`/${process.env.BOT_TOKEN}`, (req, res) => {
 });
 
 // Настроим Webhook для бота
-const webhookUrl = `https://egor-bot.onrender.com/${process.env.BOT_TOKEN}`;
+const webhookUrl = `https://https://egor-bot.timeweb.ru/${process.env.BOT_TOKEN}`;
 bot.telegram.setWebhook(webhookUrl).then(() => {
   console.log('Webhook установлен на:', webhookUrl);
 });
